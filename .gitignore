@@ -1,0 +1,12 @@
+# Ignore Cargo.lock if creating a library
+# Uncomment when creating an executable
+# Cargo.lock
+
+# Ignore compiled files
+*/target/
+
+# Ignore Rustdoc output
+*/doc/
+
+# Ignore .vscode folder
+/.vscode/
