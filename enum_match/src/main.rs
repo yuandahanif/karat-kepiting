@@ -35,6 +35,10 @@ fn main() {
     let six_or_none = plus_one(five);
     println!("{:?}", six_or_none);
 
+    if let Some(num) = six_or_none {
+        println!("{num}");
+    }
+
     let six_or_none = plus_one(None);
     println!("{:?}", six_or_none);
 
