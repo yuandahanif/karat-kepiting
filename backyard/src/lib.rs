@@ -53,10 +53,9 @@ fn destroy_all() {
 
 pub mod dangerous_gardening_stuff {
     pub fn reset_all() {
-
         // relative using super::
         super::destroy_all();
-        
+
         let mut tomato = super::gardening_stuff::Plant::plant(String::from("tomato"));
         tomato.add_pest(super::gardening_stuff::PestType::Child);
 
@@ -64,3 +63,14 @@ pub mod dangerous_gardening_stuff {
         crate::gardening_stuff::plant::plant(tomato);
     }
 }
+
+// using use
+use crate::gardening_stuff::Plant;
+
+pub fn clone_plant(plant: &Plant) -> Plant {
+    let new_plant = Plant::plant(plant.name.clone());
+    new_plant
+}
+
+// re-exporting to be use by other
+pub use gardening_stuff::Plant as DefaultPlant;
