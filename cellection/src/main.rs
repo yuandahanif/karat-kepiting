@@ -4,11 +4,12 @@ struct Plant {
     age: u8,
 }
 
-enum Type {
-    Mushroom,
-    Weed,
-    Moss,
-    Nuclear,
+#[derive(Debug)]
+enum PlantType {
+    Mushroom(Plant),
+    Weed(Plant),
+    Moss(Plant),
+    Nuclear(Plant),
 }
 
 fn main() {
@@ -43,4 +44,12 @@ fn main() {
     }
 
     println!("all plants {:?}", plants);
+
+    // use enum
+    let plants = vec![PlantType::Nuclear(Plant {
+        name: String::from("rock"),
+        age: 0,
+    })];
+
+    println!("all other plants {:?}", plants);
 }
