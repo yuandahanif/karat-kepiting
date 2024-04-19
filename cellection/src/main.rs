@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug)]
 struct Plant {
     name: String,
@@ -54,6 +56,7 @@ fn main() {
     println!("all other plants {:?}", plants);
 
     strings();
+    hashes();
 }
 
 fn strings() {
@@ -83,4 +86,43 @@ fn strings() {
     for byte in hello.bytes() {
         print!("{byte} - ");
     }
+}
+
+fn hashes() {
+    #[derive(Debug)]
+    struct Team {
+        score: u8,
+    }
+
+    let mut teams = HashMap::new();
+    teams.insert("red".to_string(), Team { score: 8 });
+    teams.insert("blue".to_string(), Team { score: 12 });
+
+    teams.insert("red".to_string(), Team { score: 90 }); // replace a value
+
+    let red = teams.get("red").clone();
+    if let Some(red) = red {
+        println!("{}", red.score);
+    }
+
+    // insert if not exist
+    teams.entry("blue".to_string()).or_insert(Team { score: 2 });
+    teams
+        .entry("yellow".to_string())
+        .or_insert(Team { score: 9 });
+
+    for (k, v) in &teams {
+        println!("{}: {:?}", k, v)
+    }
+
+    let mut word_count = HashMap::new();
+
+    let text = "Another common use case for hash maps is to look up a key’s value and then update it based on the old value. For instance, Listing 8-25 shows code that counts how many times each word appears in some text. We use a hash map with the words as keys and increment the value to keep track of how many times we’ve seen that word. If it’s the first time we’ve seen a word, we’ll first insert the value 0.";
+
+    for word in text.split_whitespace() {
+        let count = word_count.entry(word).or_insert(0);
+        *count += 1;
+    }
+
+    println!("{:?}", word_count);
 }
