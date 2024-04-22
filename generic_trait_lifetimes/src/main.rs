@@ -8,7 +8,7 @@ fn main() {
     println!("the largest number: {}", largest(&number_list));
 }
 
-fn largest(list: &[i32]) -> &i32 {
+fn largest<T>(list: &[T]) -> &T {
     let mut largest = &list[0];
 
     for num in list {
@@ -18,4 +18,23 @@ fn largest(list: &[i32]) -> &i32 {
     }
 
     largest
+}
+
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+//  this implementation apply to all generic type
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+// this implementation only apply for f32 type
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
 }
