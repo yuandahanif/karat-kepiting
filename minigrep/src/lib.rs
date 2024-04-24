@@ -26,3 +26,13 @@ pub mod config {
         Config::build(&args)
     }
 }
+
+pub mod file {
+    use std::fs;
+
+    pub fn get_contents(config: &super::config::Config) -> String {
+        let contents =
+            fs::read_to_string(&config.file_path).expect("Should have been able to read the file");
+        contents
+    }
+}

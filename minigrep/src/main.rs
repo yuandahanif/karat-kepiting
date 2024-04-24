@@ -1,4 +1,4 @@
-use minigrep::config;
+use minigrep::{config, file};
 use std::{fs, process};
 
 fn main() {
@@ -6,5 +6,9 @@ fn main() {
         println!("Problem parsing arguments! {}", err);
         process::exit(1);
     });
-    dbg!(cfg);
+    // dbg!(cfg);
+
+    let contents = file::get_contents(&cfg);
+
+    dbg!(contents);
 }
