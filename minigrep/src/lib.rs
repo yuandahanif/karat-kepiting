@@ -5,6 +5,7 @@ pub mod config {
     pub struct Config {
         pub query: String,
         pub file_path: String,
+        pub ignore_case: bool,
     }
 
     impl Config {
@@ -13,9 +14,12 @@ pub mod config {
                 return Err("not enough arguments!");
             }
 
+            let ignore_case = env::var("IGNORE_CASE").is_ok();
+
             Ok(Config {
                 query: args[1].clone(),
                 file_path: args[2].clone(),
+                ignore_case,
             })
         }
     }
@@ -48,42 +52,62 @@ pub mod file {
         results
     }
 
-    pub fn run(cfg: &super::config::Config, contents: &str) {
-        for line in search_content(&cfg.query, &contents) {
+    fn search_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
+        let mut results: Vec<&str> = vec![];
+
+        for line in content.lines() {
+            if line
+                .to_ascii_lowercase()
+                .contains(&query.to_ascii_lowercase())
+            {
+                results.push(line);
+            }
+        }
+
+        results
+    }
+
+    pub fn run(cfg: &super::config::Config, contents: &str) -> Result<(), Box<dyn Error>> {
+        let results = if cfg.ignore_case {
+            search_case_insensitive(&cfg.query, &contents)
+        } else {
+            search_content(&cfg.query, &contents)
+        };
+
+        for line in results {
             println!("{line}");
         }
+
+        Ok(())
     }
 
     #[test]
-    fn one_result() {
+    fn case_sensitive() {
         let query = "duct";
         let content = "\
         Rust:
         safe, fast, productive.
-        Pick three.";
+        Pick three.
+        Duct tape.";
 
         assert_eq!(
             vec!["        safe, fast, productive."],
             search_content(query, &content)
         );
     }
+
+    #[test]
+    fn case_insensitive() {
+        let query = "rUsT";
+        let contents = "\
+        Rust:
+        safe, fast, productive.
+        Pick three.
+        Trust me.";
+
+        assert_eq!(
+            vec!["Rust:", "        Trust me."],
+            search_case_insensitive(query, &contents)
+        );
+    }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-
-//     #[test]
-//     fn one_result() {
-//         let query = "duct";
-//         let content = "\
-//         Rust:
-//         safe, fast, productive.
-//         Pick three.";
-
-//         assert_eq!(
-//             vec!["        safe, fast, productive."],
-//             file::search_content(query, &content)
-//         );
-//     }
-// }

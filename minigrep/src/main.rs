@@ -12,5 +12,5 @@ fn main() {
         process::exit(1);
     });
 
-    file::run(&cfg, &contents);
+    let _ = file::run(&cfg, &contents);
 }
