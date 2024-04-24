@@ -33,8 +33,37 @@ pub mod file {
     pub fn get_contents(config: &super::config::Config) -> Result<String, Box<dyn Error>> {
         let contents = fs::read_to_string(&config.file_path)?;
 
-        print!("With text:\n{contents}");
-
         Ok(contents)
+    }
+
+    pub fn search_content<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
+        let mut result: Vec<&str> = vec![];
+
+        for (_, lines) in content.split("\n").enumerate() {
+            if lines.contains(query) {
+                result.push(lines.trim());
+            }
+        }
+
+        result
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let content = "\
+        Rust:
+        safe, fast, productive.
+        Pick three.";
+
+        assert_eq!(
+            vec!["safe, fast, productive."],
+            file::search_content(query, &content)
+        );
     }
 }
