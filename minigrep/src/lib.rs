@@ -3,8 +3,8 @@ pub mod config {
 
     #[derive(Debug)]
     pub struct Config {
-        query: String,
-        file_path: String,
+        pub query: String,
+        pub file_path: String,
     }
 
     impl Config {
