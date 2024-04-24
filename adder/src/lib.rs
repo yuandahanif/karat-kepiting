@@ -18,7 +18,7 @@ pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
-pub fn greating(name: &str) -> String {
+fn greating(name: &str) -> String {
     format!("Hello, {}!", name)
 }
 
@@ -65,6 +65,7 @@ mod tests {
         assert_ne!(add(2, 2), 5);
     }
 
+    // this test private fn
     #[test]
     fn greating_carol() {
         let result = greating("carol");
