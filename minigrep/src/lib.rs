@@ -37,15 +37,15 @@ pub mod file {
     }
 
     pub fn search_content<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
-        let mut result: Vec<&str> = vec![];
+        let mut results: Vec<&str> = vec![];
 
-        for (_, lines) in content.split("\n").enumerate() {
-            if lines.contains(query) {
-                result.push(lines.trim());
+        for line in content.lines() {
+            if line.contains(query) {
+                results.push(line);
             }
         }
 
-        result
+        results
     }
 }
 
@@ -62,7 +62,7 @@ mod tests {
         Pick three.";
 
         assert_eq!(
-            vec!["safe, fast, productive."],
+            vec!["        safe, fast, productive."],
             file::search_content(query, &content)
         );
     }
