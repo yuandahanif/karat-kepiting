@@ -9,6 +9,10 @@ fn main() {
     // dbg!(cfg);
 
     let contents = file::get_contents(&cfg);
+    if let Err(e) = contents {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 
     // dbg!(contents);
 }
