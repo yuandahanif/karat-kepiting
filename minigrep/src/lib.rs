@@ -36,7 +36,7 @@ pub mod file {
         Ok(contents)
     }
 
-    pub fn search_content<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
+    fn search_content<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
         let mut results: Vec<&str> = vec![];
 
         for line in content.lines() {
@@ -47,11 +47,12 @@ pub mod file {
 
         results
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    pub fn run(cfg: &super::config::Config, contents: &str) {
+        for line in search_content(&cfg.query, &contents) {
+            println!("{line}");
+        }
+    }
 
     #[test]
     fn one_result() {
@@ -63,7 +64,26 @@ mod tests {
 
         assert_eq!(
             vec!["        safe, fast, productive."],
-            file::search_content(query, &content)
+            search_content(query, &content)
         );
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[test]
+//     fn one_result() {
+//         let query = "duct";
+//         let content = "\
+//         Rust:
+//         safe, fast, productive.
+//         Pick three.";
+
+//         assert_eq!(
+//             vec!["        safe, fast, productive."],
+//             file::search_content(query, &content)
+//         );
+//     }
+// }
