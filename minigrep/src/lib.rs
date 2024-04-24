@@ -28,11 +28,13 @@ pub mod config {
 }
 
 pub mod file {
-    use std::fs;
+    use std::{error::Error, fs};
 
-    pub fn get_contents(config: &super::config::Config) -> String {
-        let contents =
-            fs::read_to_string(&config.file_path).expect("Should have been able to read the file");
-        contents
+    pub fn get_contents(config: &super::config::Config) -> Result<String, Box<dyn Error>> {
+        let contents = fs::read_to_string(&config.file_path)?;
+
+        print!("With text:\n{contents}");
+
+        Ok(contents)
     }
 }

@@ -10,5 +10,5 @@ fn main() {
 
     let contents = file::get_contents(&cfg);
 
-    dbg!(contents);
+    // dbg!(contents);
 }
