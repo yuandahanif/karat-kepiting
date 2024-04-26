@@ -1,8 +1,10 @@
+use std::rc::Rc;
+
 use smart_pointers::cons::List::{Cons, Nil};
 use smart_pointers::my_std;
 
 fn main() {
-    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+    let list = Cons(1, Rc::new(Cons(2, Rc::new(Cons(3, Rc::new(Nil))))));
     println!("Hello, world! {:?}", list);
 
     deref();
@@ -22,22 +24,35 @@ fn main() {
     };
 
     {
-        let c = my_std::CustomSmartPointer {
+        let _c = my_std::CustomSmartPointer {
             data: "replacing c".to_string(),
         };
     }
 
     drop(c);
 
-    let c = my_std::CustomSmartPointer {
+    let _c = my_std::CustomSmartPointer {
         data: "my new stuff".to_string(),
     };
 
-    let d = my_std::CustomSmartPointer {
+    let _d = my_std::CustomSmartPointer {
         data: String::from("other stuff"),
     };
 
     println!("CustomSmartPointers created.");
+
+    let a = Rc::new(Cons(3, Rc::new(Cons(4, Rc::new(Nil)))));
+    let b = Cons(1, Rc::clone(&a));
+    println!("owner count {}", Rc::strong_count(&a));
+
+    {
+        let b = Cons(1, Rc::clone(&a));
+        println!("owner count {}", Rc::strong_count(&a));
+    }
+
+    println!("owner count {}", Rc::strong_count(&a));
+    let c = Cons(2, Rc::clone(&a));
+    println!("owner count {}", Rc::strong_count(&a));
 }
 
 fn deref() {
