@@ -1,5 +1,5 @@
 pub mod config {
-    use std::env;
+    use std::env::{self};
 
     #[derive(Debug)]
     pub struct Config {
@@ -9,25 +9,33 @@ pub mod config {
     }
 
     impl Config {
-        fn build(args: &[String]) -> Result<Config, &'static str> {
-            if args.len() < 3 {
-                return Err("not enough arguments!");
-            }
+        fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+            args.next();
+
+            let mut args = args.into_iter();
+
+            let query = match args.next() {
+                Some(q) => q,
+                None => return Err("Didn't get a query string"),
+            };
+
+            let file_path = match args.next() {
+                Some(f) => f,
+                None => return Err("Didn't get a file path"),
+            };
 
             let ignore_case = env::var("IGNORE_CASE").is_ok();
 
             Ok(Config {
-                query: args[1].clone(),
-                file_path: args[2].clone(),
+                query,
+                file_path,
                 ignore_case,
             })
         }
     }
 
     pub fn parse_config() -> Result<Config, &'static str> {
-        let args: Vec<String> = env::args().collect();
-
-        Config::build(&args)
+        Config::build(env::args())
     }
 }
 
@@ -41,30 +49,22 @@ pub mod file {
     }
 
     fn search_content<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
-        let mut results: Vec<&str> = vec![];
-
-        for line in content.lines() {
-            if line.contains(query) {
-                results.push(line);
-            }
-        }
-
-        results
+        content
+            .lines()
+            .into_iter()
+            .filter(|line| line.contains(query))
+            .collect()
     }
 
     fn search_case_insensitive<'a>(query: &str, content: &'a str) -> Vec<&'a str> {
-        let mut results: Vec<&str> = vec![];
-
-        for line in content.lines() {
-            if line
-                .to_ascii_lowercase()
-                .contains(&query.to_ascii_lowercase())
-            {
-                results.push(line);
-            }
-        }
-
-        results
+        content
+            .lines()
+            .into_iter()
+            .filter(|line| {
+                line.to_ascii_lowercase()
+                    .contains(&query.to_ascii_lowercase())
+            })
+            .collect()
     }
 
     pub fn run(cfg: &super::config::Config, contents: &str) -> Result<(), Box<dyn Error>> {
