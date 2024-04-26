@@ -1,10 +1,17 @@
+use std::cell::RefCell;
 use std::rc::Rc;
 
 use smart_pointers::cons::List::{Cons, Nil};
 use smart_pointers::my_std;
 
 fn main() {
-    let list = Cons(1, Rc::new(Cons(2, Rc::new(Cons(3, Rc::new(Nil))))));
+    let list = Cons(
+        Rc::new(RefCell::new(1)),
+        Rc::new(Cons(
+            Rc::new(RefCell::new(2)),
+            Rc::new(Cons(Rc::new(RefCell::new(3)), Rc::new(Nil))),
+        )),
+    );
     println!("Hello, world! {:?}", list);
 
     deref();
@@ -41,18 +48,28 @@ fn main() {
 
     println!("CustomSmartPointers created.");
 
-    let a = Rc::new(Cons(3, Rc::new(Cons(4, Rc::new(Nil)))));
-    let b = Cons(1, Rc::clone(&a));
+    let a = Rc::new(RefCell::new(1));
+
+    let b = Rc::new(Cons(
+        Rc::new(RefCell::new(1)),
+        Rc::new(Cons(Rc::clone(&a), Rc::new(Nil))),
+    ));
     println!("owner count {}", Rc::strong_count(&a));
 
     {
-        let b = Cons(1, Rc::clone(&a));
+        let b = Cons(Rc::new(RefCell::new(3)), Rc::clone(&b));
         println!("owner count {}", Rc::strong_count(&a));
     }
 
     println!("owner count {}", Rc::strong_count(&a));
-    let c = Cons(2, Rc::clone(&a));
+    let c = Cons(Rc::new(RefCell::new(4)), Rc::clone(&b));
     println!("owner count {}", Rc::strong_count(&a));
+
+    dbg!(c);
+    *a.borrow_mut() += 10;
+
+    dbg!(b);
+    dbg!(a);
 }
 
 fn deref() {
