@@ -1,4 +1,8 @@
 pub mod config {
+
+    //! # config module
+    //! `config module` deals with how to parse input form the user with the allowed predefine Config struct
+
     use std::env::{self};
 
     #[derive(Debug)]
@@ -34,12 +38,30 @@ pub mod config {
         }
     }
 
+    /// Parse config form the cli and return the Config struct
+    ///
+    /// # Example
+    /// ```
+    /// use minigrep::config;
+    /// let cfg = config::parse_config().unwrap_or_else(|err| {
+    ///     config::Config {
+    ///     query: "".to_string(),
+    ///     file_path: "".to_string(),
+    ///     ignore_case: true,
+    ///     }
+    /// });
+    /// ```
+    ///
     pub fn parse_config() -> Result<Config, &'static str> {
         Config::build(env::args())
     }
 }
 
 pub mod file {
+    //! # file module
+    //! this module is responsible for the file operation and search functionality
+    //!
+
     use std::{error::Error, fs};
 
     pub fn get_contents(config: &super::config::Config) -> Result<String, Box<dyn Error>> {
