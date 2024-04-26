@@ -15,6 +15,29 @@ fn main() {
     let m = my_std::MyBox::new(String::from("Rust"));
     hello(&m);
     hello(&(*m)[..]); // explicit; without deref coercion
+
+    // drop trait
+    let c = my_std::CustomSmartPointer {
+        data: "my stuff".to_string(),
+    };
+
+    {
+        let c = my_std::CustomSmartPointer {
+            data: "replacing c".to_string(),
+        };
+    }
+
+    drop(c);
+
+    let c = my_std::CustomSmartPointer {
+        data: "my new stuff".to_string(),
+    };
+
+    let d = my_std::CustomSmartPointer {
+        data: String::from("other stuff"),
+    };
+
+    println!("CustomSmartPointers created.");
 }
 
 fn deref() {
