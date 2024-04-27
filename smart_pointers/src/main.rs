@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use smart_pointers::cons::List::{Cons, Nil};
 use smart_pointers::my_std;
@@ -70,6 +70,8 @@ fn main() {
 
     dbg!(b);
     dbg!(a);
+
+    node_cycle();
 }
 
 fn deref() {
@@ -89,4 +91,54 @@ fn deref() {
 
 fn hello(name: &str) {
     println!("Hello, {name}!");
+}
+
+fn node_cycle() {
+    #[derive(Debug)]
+    struct Node {
+        value: i32,
+        parent: RefCell<Weak<Node>>,
+        childern: RefCell<Vec<Rc<Node>>>,
+    }
+
+    let leaf = Rc::new(Node {
+        value: 1,
+        parent: RefCell::new(Weak::new()),
+        childern: RefCell::new(vec![]),
+    });
+
+    println!(
+        "leaf strong = {}, weak = {}",
+        Rc::strong_count(&leaf),
+        Rc::weak_count(&leaf),
+    );
+
+    {
+        let branch = Rc::new(Node {
+            value: 5,
+            parent: RefCell::new(Weak::new()),
+            childern: RefCell::new(vec![Rc::clone(&leaf)]),
+        });
+
+        *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+        println!(
+            "branch strong = {}, weak = {}",
+            Rc::strong_count(&branch),
+            Rc::weak_count(&branch),
+        );
+
+        println!(
+            "leaf strong = {}, weak = {}",
+            Rc::strong_count(&leaf),
+            Rc::weak_count(&leaf),
+        );
+    }
+
+    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+    println!(
+        "leaf strong = {}, weak = {}",
+        Rc::strong_count(&leaf),
+        Rc::weak_count(&leaf),
+    );
 }
