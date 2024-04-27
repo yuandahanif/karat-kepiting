@@ -46,6 +46,7 @@ fn pause_itter() {
 
         for val in vals {
             tx.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
         }
     });
 
