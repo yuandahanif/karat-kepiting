@@ -1,4 +1,4 @@
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -30,7 +30,10 @@ fn main() {
     //     println!("hi number {} from the main thread!", i);
     //     thread::sleep(Duration::from_millis(1));
     // }
-    pause_itter();
+    // pause_itter();
+
+    mutex_single();
+    mutex_multiple(10);
 }
 
 fn pause_itter() {
@@ -68,4 +71,36 @@ fn pause_itter() {
     for recived in rc {
         println!("Got: {}", recived);
     }
+}
+
+fn mutex_single() {
+    let m = Mutex::new(5);
+
+    {
+        let mut num = m.lock().unwrap();
+        *num = 6;
+    }
+
+    println!("{:?}", m);
+}
+
+fn mutex_multiple(num: usize) {
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+
+    for _ in 0..num {
+        let counter = Arc::clone(&counter);
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1;
+        });
+
+        handles.push(handle);
+    }
+
+    for h in handles {
+        let _ = h.join().unwrap();
+    }
+
+    println!("Result: {:?}", counter);
 }
