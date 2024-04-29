@@ -1,0 +1,20 @@
+[workspace]
+members = ["example", "gui"]
+
+[package]
+name = "oop"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "gui_lib"
+path = "gui/src/lib.rs"
+
+[[bin]]
+name = "gui-example"
+path = "example/src/main.rs"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
