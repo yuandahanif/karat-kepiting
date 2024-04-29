@@ -40,29 +40,51 @@ pub mod blog {
 
         fn request_review(self: Box<Self>) -> Box<dyn State>;
         fn approve(self: Box<Self>) -> Box<dyn State>;
+        fn reject(self: Box<Self>) -> Box<dyn State>;
     }
 
     struct Draft {}
 
     impl State for Draft {
         fn request_review(self: Box<Self>) -> Box<dyn State> {
-            Box::new(PendingReview {})
+            Box::new(PendingReview::new())
         }
 
         fn approve(self: Box<Self>) -> Box<dyn State> {
             self
         }
+
+        fn reject(self: Box<Self>) -> Box<dyn State> {
+            self
+        }
     }
 
-    struct PendingReview {}
+    struct PendingReview {
+        approved_count: u8,
+    }
+
+    impl PendingReview {
+        pub fn new() -> PendingReview {
+            PendingReview { approved_count: 0 }
+        }
+    }
 
     impl State for PendingReview {
         fn request_review(self: Box<Self>) -> Box<dyn State> {
             self
         }
 
-        fn approve(self: Box<Self>) -> Box<dyn State> {
-            Box::new(Published {})
+        fn approve(mut self: Box<Self>) -> Box<dyn State> {
+            if self.approved_count >= 1 {
+                Box::new(Published {})
+            } else {
+                self.approved_count += 1;
+                return self;
+            }
+        }
+
+        fn reject(self: Box<Self>) -> Box<dyn State> {
+            Box::new(Draft {})
         }
     }
 
@@ -74,6 +96,10 @@ pub mod blog {
         }
 
         fn approve(self: Box<Self>) -> Box<dyn State> {
+            self
+        }
+
+        fn reject(self: Box<Self>) -> Box<dyn State> {
             self
         }
 
