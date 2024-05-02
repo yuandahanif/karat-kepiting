@@ -12,7 +12,7 @@ pub mod listener {
 
     struct Worker {
         id: usize,
-        thread: JoinHandle<()>,
+        thread: Option<JoinHandle<()>>,
     }
 
     impl Worker {
@@ -20,13 +20,25 @@ pub mod listener {
             let builder = thread::Builder::new();
             let thread = builder
                 .spawn(move || loop {
-                    let job = receiver.lock().expect("can't lock mutex").recv().unwrap();
-                    println!("Worker {id} got a job; executing.");
-                    job();
+                    let message = receiver.lock().expect("can't lock mutex").recv();
+
+                    match message {
+                        Ok(job) => {
+                            println!("Worker {id} got a job; executing.");
+                            job();
+                        }
+                        Err(err) => {
+                            eprintln!("no more sender!, {}", err);
+                            break;
+                        }
+                    }
                 })
                 .unwrap();
 
-            Worker { id, thread }
+            Worker {
+                id,
+                thread: Some(thread),
+            }
         }
     }
 
@@ -34,7 +46,7 @@ pub mod listener {
 
     pub struct ThreadPool {
         workers: Vec<Worker>,
-        sender: mpsc::Sender<Job>,
+        sender: Option<mpsc::Sender<Job>>,
     }
 
     impl ThreadPool {
@@ -44,7 +56,6 @@ pub mod listener {
             }
 
             let mut workers = Vec::with_capacity(size);
-
             let (sender, receiver) = mpsc::channel::<Job>();
             let receiver = Arc::new(Mutex::new(receiver));
 
@@ -52,7 +63,10 @@ pub mod listener {
                 workers.push(Worker::new(index, receiver.clone()));
             }
 
-            Ok(ThreadPool { workers, sender })
+            Ok(ThreadPool {
+                workers,
+                sender: Some(sender),
+            })
         }
 
         pub fn execute<F>(&self, job: F)
@@ -60,7 +74,20 @@ pub mod listener {
             F: FnOnce() + Send + 'static,
         {
             let job = Box::new(job);
-            self.sender.send(job).unwrap();
+            self.sender.as_ref().unwrap().send(job).unwrap();
+        }
+    }
+
+    impl Drop for ThreadPool {
+        fn drop(&mut self) {
+            drop(self.sender.take());
+
+            for worker in &mut self.workers {
+                println!("Shutting down worker {}", worker.id);
+                if let Some(thread) = worker.thread.take() {
+                    thread.join().unwrap();
+                }
+            }
         }
     }
 }
